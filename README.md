@@ -1,7 +1,7 @@
 ## Basic API for transferring money between accounts
 
 ## Stack
-Written in Koltin \
+Written in Kotlin \
 Uses Maven build \
 Tests using Junit and [Struktural](https://github.com/kennycason/struktural) \
 Uses [SparkJava](http://sparkjava.com/) as API framework \
