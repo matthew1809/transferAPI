@@ -1,14 +1,15 @@
 package com.foyle.testing
 
-import org.junit.*
-import org.junit.Assert.*
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import com.google.gson.Gson
 import spark.Spark
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import com.foyle.Main
 import com.google.gson.JsonParser
-import com.kennycason.struktural.*
+import com.kennycason.struktural.Struktural
 
 val PORT = "4567"
 private var client: Client? = null

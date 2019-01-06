@@ -1,6 +1,6 @@
 package com.foyle.internal
 
-import com.foyle.models.*
+import com.foyle.models.Account
 import java.math.BigDecimal
 
 interface InternalService {

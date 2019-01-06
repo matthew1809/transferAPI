@@ -1,17 +1,33 @@
 package com.foyle
 
-import spark.Spark.*
+// Spark specific
+import spark.Spark.exception
+import spark.Spark.notFound
+import spark.Spark.path
+import spark.Spark.after
+import spark.Spark.get
+import spark.Spark.post
+import spark.Spark.halt
+
+// Models
 import com.foyle.models.Account
 import com.foyle.models.Transfer
+import com.foyle.models.NewAccount
+
+// Gson specific
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.foyle.internal.InternalServiceImpl
-import com.foyle.models.NewAccount
 import com.google.gson.JsonParser
+
+// Internal Service
+import com.foyle.internal.InternalServiceImpl
+
+// Number specific
 import kotlin.math.sign
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+// Holds all API routes
 class Controller {
 
   private val intService = InternalServiceImpl()
@@ -23,16 +39,16 @@ class Controller {
   val gson = GsonBuilder().create()
 
   private fun initRoutes() {
-    exception(Exception::class.java) { e, req, res -> e.printStackTrace() }
+    exception(Exception::class.java) { e, _, _ -> e.printStackTrace() }
 
-    notFound { req, res ->
+    notFound { _, res ->
       res.type("application/json")
       "{\"message\":\"The route you are attempting to reach has not been found. Try GET /accounts, GET /accounts/:id, POST /accounts/:id/transfer, POST /accounts/new\"}"
     }
 
     path("accounts") {
 
-      after("/*") { request, response -> response.type("application/json") }
+      after("/*") { req, res -> res.type("application/json") }
 
       get("") { req, res ->
         res.type("application/json")
@@ -46,7 +62,6 @@ class Controller {
           halt(500, e.message)
         }
       }
-
 
       get("/:id") { req, res ->
         res.type("application/json")

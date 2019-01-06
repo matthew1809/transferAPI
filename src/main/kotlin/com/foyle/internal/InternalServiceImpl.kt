@@ -1,15 +1,24 @@
 package com.foyle.internal
 
+// Models
 import com.foyle.models.Account
+
+// Is what it is
 import java.lang.Exception
-import java.math.BigDecimal
-import java.util.concurrent.atomic.AtomicInteger
+
+// Concurrency specific
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+
+// Number specific
+import java.util.concurrent.atomic.AtomicInteger
+import java.math.BigDecimal
 import java.math.RoundingMode
 
+// Implements interface for API methods
 class InternalServiceImpl : InternalService {
 
+    // Initialise our accounts as a hashmap of Accounts
   private val accounts = hashMapOf(
     0 to Account(name = "Ivan", email = "ivan@revolut.ru", id = 0, closed = false, balance = BigDecimal(5000.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
     1 to Account(name = "Matthew", email = "matthew@revolut.ru", id = 1, closed = false, balance = BigDecimal(10.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
@@ -20,12 +29,15 @@ class InternalServiceImpl : InternalService {
     6 to Account(name = "John", email = "john@john.kt", id = 6, closed = true, balance = BigDecimal(500.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom")
   )
 
-  var lastId: AtomicInteger = AtomicInteger(accounts.size - 1)
+  // Initialise our variable for creating a new account ID
+  val lastId: AtomicInteger = AtomicInteger(accounts.size - 1)
 
+  // Helper function to throw an exception
   fun fail(message: String?): Nothing {
-    throw IllegalStateException(message)
+    throw Exception(message)
   }
 
+  // Return the account with the given ID
   override fun findSingle(id: Int): Account? {
 
     return try {
@@ -35,6 +47,7 @@ class InternalServiceImpl : InternalService {
     }
   }
 
+  // Transfer money from one account to another account
   override fun transfer(senderID: Int, receiverID: Int, amount: BigDecimal): Account? = try {
 
     val lock = ReentrantLock()
@@ -81,7 +94,7 @@ class InternalServiceImpl : InternalService {
         )
       )
 
-      return accounts.get(senderID)
+      return accounts[senderID]
     }
   } catch (e: Exception) {
     fail(e.message)
@@ -93,8 +106,8 @@ class InternalServiceImpl : InternalService {
     val id = lastId.incrementAndGet()
     accounts.put(id, Account(name = name, email = email, id = id, closed = false, balance = BigDecimal(0.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"))
 
-    return accounts.get(id)
-    } catch(e: Exception) {
+    return accounts[id]
+    } catch (e: Exception) {
       fail(e.message)
     }
   }
@@ -102,7 +115,6 @@ class InternalServiceImpl : InternalService {
   override fun findAll(): HashMap<Int, Account> {
     try {
     return accounts
-
   } catch (e: Exception) {
       fail(e.message)
     }
