@@ -42,6 +42,7 @@ class InternalServiceImpl : InternalService {
     lock.withLock {
 
       val senderAC = accounts.get(senderID) ?: fail("Sender not found!")
+
       val receiverAC = accounts.get(receiverID) ?: fail("Recipient not found!")
 
       if (senderID == receiverID) {
@@ -88,9 +89,22 @@ class InternalServiceImpl : InternalService {
 
   override fun save(name: String, email: String): Account? {
 
+    try {
     val id = lastId.incrementAndGet()
     accounts.put(id, Account(name = name, email = email, id = id, closed = false, balance = BigDecimal(0.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"))
 
     return accounts.get(id)
+    } catch(e: Exception) {
+      fail(e.message)
+    }
+  }
+
+  override fun findAll(): HashMap<Int, Account> {
+    try {
+    return accounts
+
+  } catch (e: Exception) {
+      fail(e.message)
+    }
   }
 }

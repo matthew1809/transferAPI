@@ -3,24 +3,20 @@ package com.foyle
 import spark.Spark.*
 import com.foyle.models.Account
 import com.foyle.models.Transfer
-
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-
 import com.foyle.internal.InternalServiceImpl
 import com.foyle.models.NewAccount
 import com.google.gson.JsonParser
 import kotlin.math.sign
 import java.math.BigDecimal
 import java.math.RoundingMode
-import com.beerboy.ss.SparkSwagger
 
 class Controller {
 
   private val intService = InternalServiceImpl()
 
   init {
-    init()
     initRoutes()
   }
 
@@ -29,10 +25,28 @@ class Controller {
   private fun initRoutes() {
     exception(Exception::class.java) { e, req, res -> e.printStackTrace() }
 
-    // Initialise the spark service
-    // val spark: spark.Service = spark.Service.ignite().port(4567)
+    notFound { req, res ->
+      res.type("application/json")
+      "{\"message\":\"The route you are attempting to reach has not been found. Try GET /accounts, GET /accounts/:id, POST /accounts/:id/transfer, POST /accounts/new\"}"
+    }
 
     path("accounts") {
+
+      after("/*") { request, response -> response.type("application/json") }
+
+      get("") { req, res ->
+        res.type("application/json")
+
+        try {
+          val accounts = intService.findAll()
+
+          res.status(200)
+          Gson().toJsonTree(accounts)
+        } catch (e: Exception) {
+          halt(500, e.message)
+        }
+      }
+
 
       get("/:id") { req, res ->
         res.type("application/json")

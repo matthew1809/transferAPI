@@ -256,4 +256,48 @@ class MainTest {
 
         assertEquals(400, testTransferWithNoPayloadDataRes?.status)
     }
+
+    @Test
+    @Throws(java.lang.Exception::class)
+    // Tests fetching all accounts at once
+    fun getAllAccounts() {
+        Spark.awaitInitialization()
+
+        val allAccountsRes: Response? = client?.request("GET", "/accounts")
+
+        assertEquals(200, allAccountsRes?.status)
+    }
+
+    @Test
+    @Throws(java.lang.Exception::class)
+    // Tests fetching all accounts at once
+    fun createAccount() {
+
+        val name = "test"
+
+        Spark.awaitInitialization()
+        val createAccountBody = """{"name": $name, "email": "test@test.com"}"""
+        val createAccountRes: Response? = client?.request("POST", "/accounts/new", createAccountBody)
+
+        assertEquals(200, createAccountRes?.status)
+        // Assert status of recipient account
+        Struktural.assertValues(createAccountRes!!.body, listOf(
+            Pair("name", name),
+            Pair("balance", 0.00)
+        ))
+        // Senders account to JSON
+        val jsonCreateAccountRes = JsonParser().parse(createAccountRes?.body).getAsJsonObject()
+
+        // New account id as int
+        val id = jsonCreateAccountRes.get("id").getAsInt()
+
+        // Fetch the created account
+        val createdAccountRes: Response? = client?.request("GET", "/accounts/$id")
+
+        // Assert the new account ID is same as creation response
+        Struktural.assertValues(createdAccountRes!!.body, listOf(
+            Pair("name", name),
+            Pair("id", id)
+        ))
+    }
 }
