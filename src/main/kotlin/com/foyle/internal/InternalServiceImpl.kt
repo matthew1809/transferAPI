@@ -30,7 +30,7 @@ class InternalServiceImpl : InternalService {
   )
 
   // Initialise our variable for creating a new account ID
-  val lastId: AtomicInteger = AtomicInteger(accounts.size - 1)
+  private val lastId: AtomicInteger = AtomicInteger(accounts.size - 1)
 
   // Helper function to throw an exception
   fun fail(message: String?): Nothing {
@@ -43,7 +43,7 @@ class InternalServiceImpl : InternalService {
     return try {
       accounts[id]
     } catch (e: Exception) {
-      null
+      fail(e.message)
     }
   }
 
@@ -104,7 +104,7 @@ class InternalServiceImpl : InternalService {
 
     try {
     val id = lastId.incrementAndGet()
-    accounts.put(id, Account(name = name, email = email, id = id, closed = false, balance = BigDecimal(0.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"))
+    accounts.put(id, Account(name = name, email = email, id = id, closed = false, balance = BigDecimal(0.00).setScale(2), country = "United Kingdom"))
 
     return accounts[id]
     } catch (e: Exception) {

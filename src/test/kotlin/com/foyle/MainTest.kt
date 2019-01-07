@@ -239,22 +239,24 @@ class MainTest {
         val recipient: Int = 4
         val amount: Double = 1.0
 
+        // Non JSON body
+        val testWithNoJsonTypeBody = ""
+        val testWithNoJsonType: Response? = client?.request("POST", "/accounts/$sender/transfer", testWithNoJsonTypeBody)
+        assertEquals(400, testWithNoJsonType?.status)
+
         // No recipient
         val testTransferWithNoRecipientBody: String = "{\"amount\": $amount }"
         val testTransferWithNoRecipientRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithNoRecipientBody)
-
         assertEquals(400, testTransferWithNoRecipientRes?.status)
 
         // No amount
         val testTransferWithNoAmountBody: String = "{\"recipient\": $recipient }"
         val testTransferWithNoAmountRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithNoAmountBody)
-
         assertEquals(400, testTransferWithNoAmountRes?.status)
 
         // No payload data
         val testTransferWithNoPayloadDataBody: String = "{}"
         val testTransferWithNoPayloadDataRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithNoPayloadDataBody)
-
         assertEquals(400, testTransferWithNoPayloadDataRes?.status)
     }
 

@@ -38,6 +38,18 @@ class Controller {
 
   val gson = GsonBuilder().create()
 
+  private fun postValidator(req: spark.Request) {
+
+    if (req.contentLength() == 0) {
+      halt(400, "Expected a payload with content in it")
+    }
+
+    if ("application/json" !in req.contentType()) {
+      println("should halt")
+      halt(400, "Body must be of type application/json")
+    }
+  }
+
   private fun initRoutes() {
     exception(Exception::class.java) { e, _, _ -> e.printStackTrace() }
 
@@ -48,10 +60,9 @@ class Controller {
 
     path("accounts") {
 
-      after("/*") { req, res -> res.type("application/json") }
+      after("/*") { _, res -> res.type("application/json") }
 
       get("") { req, res ->
-        res.type("application/json")
 
         try {
           val accounts = intService.findAll()
@@ -64,7 +75,6 @@ class Controller {
       }
 
       get("/:id") { req, res ->
-        res.type("application/json")
 
         try {
           val ac = intService.findSingle(req.params("id").toInt())
@@ -76,7 +86,8 @@ class Controller {
       }
 
       post("/new") { req, res ->
-        res.type("application/json")
+
+        postValidator(req)
 
         val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
 
@@ -98,7 +109,7 @@ class Controller {
 
       post("/:id/transfer") { req, res ->
 
-        res.type("application/json")
+        postValidator(req)
 
         val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
 
