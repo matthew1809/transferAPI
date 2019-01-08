@@ -21,6 +21,7 @@ import com.google.gson.JsonParser
 
 // Internal Service
 import com.foyle.internal.InternalServiceImpl
+import com.foyle.internal.JsonResponseTransformer
 
 // Number specific
 import kotlin.math.sign
@@ -31,12 +32,23 @@ import java.math.RoundingMode
 class Controller {
 
   private val intService = InternalServiceImpl()
+  private val gson = Gson()
 
   init {
     initRoutes()
   }
 
-  val gson = GsonBuilder().create()
+  private fun transferValidator(req: spark.Request) {
+    val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
+
+    if (!jsonObj.has("amount") || !jsonObj.has("recipient")) {
+      halt(400, gson.toJson("Check you have supplied a recipient and an amount in the body"))
+    }
+
+    if (jsonObj.get("amount").asDouble.sign != 1.0) {
+      halt(400, gson.toJson("You cannot transfer nothing or negative amounts"))
+    }
+  }
 
   private fun postValidator(req: spark.Request) {
 
@@ -50,92 +62,86 @@ class Controller {
     }
   }
 
+  private fun newAccountValidator(req: spark.Request) {
+    val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
+
+    if (!jsonObj.has("name") || !jsonObj.has("email")) {
+      halt(400, "You have not provided a name and email!")
+    }
+  }
+
   private fun initRoutes() {
+
     exception(Exception::class.java) { e, _, _ -> e.printStackTrace() }
 
     notFound { _, res ->
-      res.type("application/json")
       "{\"message\":\"The route you are attempting to reach has not been found. Try GET /accounts, GET /accounts/:id, POST /accounts/:id/transfer, POST /accounts/new\"}"
     }
 
+    // Always set JSON as the response type
+    after("/*") { _, res -> res.type("application/json") }
+
     path("accounts") {
 
-      after("/*") { _, res -> res.type("application/json") }
-
-      get("") { req, res ->
-
+      // Get all accounts
+      get("", { req, res ->
         try {
-          val accounts = intService.findAll()
-
           res.status(200)
-          Gson().toJsonTree(accounts)
+          intService.findAll()
+
         } catch (e: Exception) {
-          halt(500, e.message)
+          halt(500, gson.toJson(e.message))
         }
-      }
+      }, gson::toJson)
 
-      get("/:id") { req, res ->
 
+      // Find a single account by ID
+      get("/:id", { req, res ->
         try {
-          val ac = intService.findSingle(req.params("id").toInt())
           res.status(200)
-          Gson().toJsonTree(ac)
+          intService.findSingle(req.params("id").toInt())
         } catch (e: Exception) {
-          halt(500, e.message)
+          res.status(403)
+          println(e.message)
+          gson.toJson(e.message)
         }
-      }
+      }, gson::toJson)
 
-      post("/new") { req, res ->
+      // Create a new account
+      post("/new", { req, res ->
 
         postValidator(req)
-
-        val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
-
-        if (!jsonObj.has("name") || !jsonObj.has("email")) {
-          halt(400, gson.toJson("You have not provided a name and email!"))
-        }
+        newAccountValidator(req)
 
         val payload: NewAccount = gson.fromJson(req.body(), NewAccount::class.java)
 
         try {
-          val newAccountResult: Account? = intService.save(payload.name, payload.email)
-
           res.status(200)
-          gson.toJson(newAccountResult)
+          intService.save(payload.name, payload.email)
         } catch (e: java.lang.Exception) {
           halt(500, gson.toJson(e.message))
         }
-      }
+      }, gson::toJson)
 
-      post("/:id/transfer") { req, res ->
+
+      // Transfer money from one account to another
+      post("/:id/transfer", { req, res ->
 
         postValidator(req)
-
-        val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
-
-        if (!jsonObj.has("amount") || !jsonObj.has("recipient")) {
-          halt(400, gson.toJson("Check you have supplied a recipient and an amount in the body"))
-        }
-
-        if (jsonObj.get("amount").asDouble.sign != 1.0) {
-          halt(400, gson.toJson("You cannot transfer nothing or negative amounts"))
-        }
+        transferValidator(req)
 
         try {
 
           val payload: Transfer = gson.fromJson(req.body(), Transfer::class.java)
 
-          val transferResult = intService.transfer(req.params("id").toInt(), payload.recipient, BigDecimal(payload.amount.toDouble()).setScale(2, RoundingMode.DOWN))
-
-          val jsonTransferResult = Gson().toJsonTree(transferResult)
-
           res.status(200)
+          intService.transfer(req.params("id").toInt(), payload.recipient, BigDecimal(payload.amount.toDouble()).setScale(2, RoundingMode.DOWN))
 
-          gson.toJson(jsonTransferResult)
         } catch (e: Exception) {
           halt(403, gson.toJson(e.message))
         }
-      }
+      }, gson::toJson)
+
     }
   }
 }
