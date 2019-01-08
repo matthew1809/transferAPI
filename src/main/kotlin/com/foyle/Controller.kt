@@ -71,7 +71,7 @@ class Controller {
     }
   }
 
-  private fun findAccountValidator(str: String) {
+  private fun IDValidator(str: String) {
     try {
       str.toInt()
     } catch(e: NumberFormatException) {
@@ -109,7 +109,7 @@ class Controller {
       get("/:id", { req, res ->
 
         val id = req.params("id")
-        findAccountValidator(id)
+        IDValidator(id)
 
         try {
           res.status(200)
@@ -148,9 +148,12 @@ class Controller {
         try {
 
           val payload: Transfer = gson.fromJson(req.body(), Transfer::class.java)
+          val id = req.params("id")
+
+          IDValidator(id)
 
           res.status(200)
-          intService.transfer(req.params("id").toInt(), payload.recipient, BigDecimal(payload.amount.toDouble()).setScale(2, RoundingMode.DOWN))
+          intService.transfer(id.toInt(), payload.recipient, BigDecimal(payload.amount.toDouble()).setScale(2, RoundingMode.DOWN))
 
         } catch (e: Exception) {
           halt(403, gson.toJson(e.message))
