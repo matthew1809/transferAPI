@@ -39,6 +39,7 @@ class Controller {
     initRoutes()
   }
 
+  // Validates the body of a transfer request
   private fun transferValidator(req: spark.Request) {
     val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
 
@@ -51,6 +52,7 @@ class Controller {
     }
   }
 
+  // Validates the content of a POST request
   private fun postValidator(req: spark.Request) {
 
     if (req.contentLength() == 0) {
@@ -58,11 +60,11 @@ class Controller {
     }
 
     if ("application/json" !in req.contentType()) {
-      println("should halt")
       halt(400, "Body must be of type application/json")
     }
   }
 
+  // Validates the specific body of a a new account request
   private fun newAccountValidator(req: spark.Request) {
     val jsonObj = JsonParser().parse(req.body()).getAsJsonObject()
 
@@ -71,6 +73,7 @@ class Controller {
     }
   }
 
+  // Validates an ID of an account being requested
   private fun IDValidator(str: String) {
     try {
       str.toInt()
@@ -132,8 +135,8 @@ class Controller {
 
         try {
           res.status(200)
-          intService.save(payload.name, payload.email)
-        } catch (e: java.lang.Exception) {
+          intService.newAccount(payload.name, payload.email)
+        } catch (e: Exception) {
           halt(500, gson.toJson(e.message))
         }
       }, gson::toJson)
@@ -156,7 +159,8 @@ class Controller {
           intService.transfer(id.toInt(), payload.recipient, BigDecimal(payload.amount.toDouble()).setScale(2, RoundingMode.DOWN))
 
         } catch (e: Exception) {
-          halt(403, gson.toJson(e.message))
+          res.status(403)
+          gson.toJson(e.message)
         }
       }, gson::toJson)
 

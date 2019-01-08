@@ -104,7 +104,7 @@ class InternalServiceImpl : InternalService {
     fail(e.message)
   }
 
-  override fun save(name: String, email: String): Account? {
+  override fun newAccount(name: String, email: String): Account? {
 
     try {
     val id = lastId.incrementAndGet()

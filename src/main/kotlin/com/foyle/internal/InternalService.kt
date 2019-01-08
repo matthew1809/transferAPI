@@ -11,5 +11,5 @@ interface InternalService {
 
   fun transfer(senderID: Int, receiverID: Int, amount: BigDecimal): Account?
 
-  fun save(name: String, email: String): Account?
+  fun newAccount(name: String, email: String): Account?
 }
