@@ -69,6 +69,19 @@ class MainTest {
 
     @Test
     @Throws(Exception::class)
+    fun accountNotFoundTest() {
+
+        Spark.awaitInitialization()
+
+        // Get the first account
+        val getAccountRes: Response? = client?.request("GET", "/accounts/3000000000")
+
+        // Assert 200 response
+        assertEquals(403, getAccountRes?.status)
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun transferCorrectTest() {
 
         Spark.awaitInitialization()
@@ -273,9 +286,8 @@ class MainTest {
 
     @Test
     @Throws(java.lang.Exception::class)
-    // Tests fetching all accounts at once
-    fun createAccount() {
-
+    // Tests creating an account
+    fun createAccountTest() {
         val name = "test"
 
         Spark.awaitInitialization()

@@ -40,6 +40,10 @@ class InternalServiceImpl : InternalService {
   // Return the account with the given ID
   override fun findSingle(id: Int): Account? {
 
+    if(!accounts.containsKey(id)) {
+      fail("Account not found")
+    }
+
     return try {
       accounts[id]
     } catch (e: Exception) {
