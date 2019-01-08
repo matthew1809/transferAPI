@@ -10,19 +10,15 @@ import spark.Spark.post
 import spark.Spark.halt
 
 // Models
-import com.foyle.models.Account
 import com.foyle.models.Transfer
 import com.foyle.models.NewAccount
 
 // Gson specific
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 
 // Internal Service
 import com.foyle.internal.InternalServiceImpl
-import com.foyle.internal.JsonResponseTransformer
-import spark.Request
 
 // Number specific
 import kotlin.math.sign
@@ -74,7 +70,7 @@ class Controller {
   }
 
   // Validates an ID of an account being requested
-  private fun IDValidator(str: String) {
+  private fun iDValidator(str: String) {
     try {
       str.toInt()
     } catch(e: NumberFormatException) {
@@ -112,7 +108,7 @@ class Controller {
       get("/:id", { req, res ->
 
         val id = req.params("id")
-        IDValidator(id)
+        iDValidator(id)
 
         try {
           res.status(200)
@@ -153,10 +149,10 @@ class Controller {
           val payload: Transfer = gson.fromJson(req.body(), Transfer::class.java)
           val id = req.params("id")
 
-          IDValidator(id)
+          iDValidator(id)
 
           res.status(200)
-          intService.transfer(id.toInt(), payload.recipient, BigDecimal(payload.amount.toDouble()).setScale(2, RoundingMode.DOWN))
+          intService.transfer(id.toInt(), payload.recipient, BigDecimal(payload.amount).setScale(2, RoundingMode.DOWN))
 
         } catch (e: Exception) {
           res.status(403)
