@@ -76,8 +76,8 @@ class MainTest {
         // Get the first account
         val getAccountRes: Response? = client?.request("GET", "/accounts/3000000000")
 
-        // Assert 200 response
-        assertEquals(403, getAccountRes?.status)
+        // Assert 400 response
+        assertEquals(400, getAccountRes?.status)
     }
 
     @Test

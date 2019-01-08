@@ -22,6 +22,7 @@ import com.google.gson.JsonParser
 // Internal Service
 import com.foyle.internal.InternalServiceImpl
 import com.foyle.internal.JsonResponseTransformer
+import spark.Request
 
 // Number specific
 import kotlin.math.sign
@@ -70,6 +71,15 @@ class Controller {
     }
   }
 
+  private fun findAccountValidator(str: String) {
+    try {
+      str.toInt()
+    } catch(e: NumberFormatException) {
+      halt(400, "You have not provided a valid ID")
+    }
+
+  }
+
   private fun initRoutes() {
 
     exception(Exception::class.java) { e, _, _ -> e.printStackTrace() }
@@ -97,15 +107,20 @@ class Controller {
 
       // Find a single account by ID
       get("/:id", { req, res ->
+
+        val id = req.params("id")
+        findAccountValidator(id)
+
         try {
           res.status(200)
-          intService.findSingle(req.params("id").toInt())
+
+          intService.findSingle(id.toInt())
         } catch (e: Exception) {
           res.status(403)
-          println(e.message)
           gson.toJson(e.message)
         }
       }, gson::toJson)
+
 
       // Create a new account
       post("/new", { req, res ->
