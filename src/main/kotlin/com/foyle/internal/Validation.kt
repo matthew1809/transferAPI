@@ -4,6 +4,7 @@ import com.google.gson.JsonParser
 import com.google.gson.Gson
 import spark.Spark
 import kotlin.math.sign
+import java.lang.Double.parseDouble
 
 object Validation {
 
@@ -16,9 +17,26 @@ object Validation {
         if (!jsonObj.has("amount") || !jsonObj.has("recipient")) {
             Spark.halt(400, gson.toJson("Check you have supplied a recipient and an amount in the body"))
         }
+        val amount = jsonObj.get("amount")
 
-        if (jsonObj.get("amount").asDouble.sign != 1.0) {
+        try {
+            parseDouble(amount.asString)
+        } catch (e: NumberFormatException) {
+            Spark.halt(400, gson.toJson("Amount must be a valid number"))
+        }
+
+        if (amount.asDouble.sign != 1.0) {
             Spark.halt(400, gson.toJson("You cannot transfer nothing or negative amounts"))
+        }
+
+        val decimalPlaceSplitter = amount.toString().split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+        if (decimalPlaceSplitter.size == 2) {
+
+            if(decimalPlaceSplitter[1].length > 2) {
+                Spark.halt(400, "You must provide a number with 2 numbers after the decimal place i.e. 1.00")
+            }
+
         }
     }
 

@@ -144,7 +144,7 @@ class MainTest {
         // Set values
         val recipient: Int = 4
         val sender: Int = 3
-        val negativeAmount: Int = -1
+        val negativeAmount: Double = -1.00
 
         // Attempt transfer using negative value
         val testTransferWithNegativeNumberBody: String = "{\"amount\": $negativeAmount, \"recipient\": $recipient }"
@@ -169,7 +169,7 @@ class MainTest {
         val initialSenderBalance = getBalance(3)
 
         // Set amount to transfer as more than account balance
-        val amountToTransfer: Double = initialSenderBalance + 100
+        val amountToTransfer: Double = initialSenderBalance + 100.00
 
         // Make sure senders balance is insufficient
         assertTrue("Sender balance should be sufficient at time of transfer request", initialSenderBalance < amountToTransfer)
@@ -250,9 +250,8 @@ class MainTest {
 
         val sender: Int = 3
         val recipient: Int = 4
-        val amount: Double = 1.0
-        val intAmount: Int = 1
-        val tooManyDecimalsAmount: Double = 1.999
+        val amount: Double = 1.00
+        val tooManyDecimalsAmount: Double = 50.999
 
         // Non JSON body
         val testWithNoJsonTypeBody = ""
@@ -273,11 +272,6 @@ class MainTest {
         val testTransferWithNoPayloadDataBody: String = "{}"
         val testTransferWithNoPayloadDataRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithNoPayloadDataBody)
         assertEquals(400, testTransferWithNoPayloadDataRes?.status)
-
-        // Amount as int not double
-        val testTransferWithInvalidAmountBody: String = "{\"amount\": $intAmount, \"recipient\": $recipient }"
-        val testTransferWithInvalidAmountRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithInvalidAmountBody)
-        assertEquals(400, testTransferWithInvalidAmountRes?.status)
 
         // Amount as double with too many decimal places
         val testTransferWithTooManyDecimalsAmountBody: String = "{\"amount\": $tooManyDecimalsAmount, \"recipient\": $recipient }"
