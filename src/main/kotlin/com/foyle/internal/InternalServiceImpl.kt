@@ -20,8 +20,8 @@ class InternalServiceImpl : InternalService {
 
     // Initialise our accounts as a hashmap of Accounts
   private val accounts = hashMapOf(
-    0 to Account(name = "Ivan", email = "ivan@revolut.ru", id = 0, closed = false, balance = BigDecimal(5000.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
-    1 to Account(name = "Matthew", email = "matthew@revolut.ru", id = 1, closed = false, balance = BigDecimal(10.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
+    0 to Account(name = "Ivan", email = "ivan@ivan.kt", id = 0, closed = false, balance = BigDecimal(5000.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
+    1 to Account(name = "Matthew", email = "matthew@matthew.kt", id = 1, closed = false, balance = BigDecimal(10.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
     2 to Account(name = "Carol", email = "carol@carol.kt", id = 2, closed = false, balance = BigDecimal(100.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
     3 to Account(name = "Dave", email = "dave@dave.kt", id = 3, closed = false, balance = BigDecimal(70.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),
     4 to Account(name = "Marina", email = "marina@marina.kt", id = 4, closed = false, balance = BigDecimal(0.00).setScale(2, RoundingMode.DOWN), country = "United Kingdom"),

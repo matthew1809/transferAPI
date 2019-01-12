@@ -251,6 +251,8 @@ class MainTest {
         val sender: Int = 3
         val recipient: Int = 4
         val amount: Double = 1.0
+        val intAmount: Int = 1
+        val tooManyDecimalsAmount: Double = 1.999
 
         // Non JSON body
         val testWithNoJsonTypeBody = ""
@@ -271,6 +273,16 @@ class MainTest {
         val testTransferWithNoPayloadDataBody: String = "{}"
         val testTransferWithNoPayloadDataRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithNoPayloadDataBody)
         assertEquals(400, testTransferWithNoPayloadDataRes?.status)
+
+        // Amount as int not double
+        val testTransferWithInvalidAmountBody: String = "{\"amount\": $intAmount, \"recipient\": $recipient }"
+        val testTransferWithInvalidAmountRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithInvalidAmountBody)
+        assertEquals(400, testTransferWithInvalidAmountRes?.status)
+
+        // Amount as double with too many decimal places
+        val testTransferWithTooManyDecimalsAmountBody: String = "{\"amount\": $tooManyDecimalsAmount, \"recipient\": $recipient }"
+        val testTransferWithTooManyDecimalsAmountRes: Response? = client?.request("POST", "/accounts/$sender/transfer", testTransferWithTooManyDecimalsAmountBody)
+        assertEquals(400, testTransferWithTooManyDecimalsAmountRes?.status)
     }
 
     @Test
