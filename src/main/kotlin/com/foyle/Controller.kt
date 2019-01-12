@@ -25,18 +25,27 @@ import com.foyle.internal.Validation
 // Number specific
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.concurrent.withLock
+import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.locks.Lock
 
 // Holds all API routes
 class Controller {
 
   private val intService = InternalServiceImpl()
   private val gson = Gson()
+  private val readWriteLock: ReentrantReadWriteLock = ReentrantReadWriteLock()
+  private val readLock: Lock = readWriteLock.readLock()
+  private val writeLock: Lock = readWriteLock.writeLock()
 
   init {
     initRoutes()
   }
 
   private fun initRoutes() {
+
+    spark.Spark.threadPool(10)
 
     exception(Exception::class.java) { e, _, _ -> e.printStackTrace() }
 
@@ -53,7 +62,7 @@ class Controller {
       get("", { req, res ->
         try {
           res.status(200)
-          intService.findAll()
+            intService.findAll(readLock)
 
         } catch (e: Exception) {
           halt(500, gson.toJson(e.message))
@@ -69,8 +78,7 @@ class Controller {
 
         try {
           res.status(200)
-
-          intService.findSingle(id.toInt())
+            intService.findSingle(id.toInt(), readLock)
         } catch (e: Exception) {
           res.status(403)
           gson.toJson(e.message)
@@ -109,7 +117,12 @@ class Controller {
           Validation.iDValidator(id)
 
           res.status(200)
-          intService.transfer(id.toInt(), payload.recipient, BigDecimal(payload.amount).setScale(2, RoundingMode.DOWN))
+            intService.transfer(
+              id.toInt(),
+              payload.recipient,
+              BigDecimal(payload.amount).setScale(2),
+              writeLock
+            )
 
         } catch (e: Exception) {
           res.status(403)

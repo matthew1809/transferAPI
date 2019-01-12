@@ -6,14 +6,13 @@ import com.foyle.models.Account
 // Is what it is
 import java.lang.Exception
 
-// Concurrency specific
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
-
 // Number specific
 import java.util.concurrent.atomic.AtomicInteger
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.concurrent.locks.Lock
+import kotlin.concurrent.withLock
+import java.util.concurrent.locks.ReadWriteLock
 
 // Implements interface for API methods
 class InternalServiceImpl : InternalService {
@@ -38,26 +37,26 @@ class InternalServiceImpl : InternalService {
   }
 
   // Return the account with the given ID
-  override fun findSingle(id: Int): Account? {
+  override fun findSingle(id: Int, lock: Lock): Account? {
 
     if(!accounts.containsKey(id)) {
       fail("Account not found")
     }
 
     return try {
-      accounts[id]
+      lock.withLock {
+        accounts[id]
+      }
     } catch (e: Exception) {
       fail(e.message)
     }
   }
 
-  // Transfer money from one account to another account
-  override fun transfer(senderID: Int, receiverID: Int, amount: BigDecimal): Account? = try {
 
-    val lock = ReentrantLock()
+  // Transfer money from one account to another account
+  override fun transfer(senderID: Int, receiverID: Int, amount: BigDecimal, lock: Lock): Account? = try {
 
     lock.withLock {
-
       val senderAC = accounts.get(senderID) ?: fail("Sender not found!")
 
       val receiverAC = accounts.get(receiverID) ?: fail("Recipient not found!")
@@ -98,8 +97,9 @@ class InternalServiceImpl : InternalService {
         )
       )
 
-      return accounts[senderID]
+      accounts[senderID]
     }
+
   } catch (e: Exception) {
     fail(e.message)
   }
@@ -116,9 +116,11 @@ class InternalServiceImpl : InternalService {
     }
   }
 
-  override fun findAll(): HashMap<Int, Account> {
+  override fun findAll(lock: Lock): HashMap<Int, Account> {
     try {
-    return accounts
+      lock.withLock {
+        return accounts
+      }
   } catch (e: Exception) {
       fail(e.message)
     }
